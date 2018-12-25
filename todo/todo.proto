@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package todo;
+
+message Task {
+    int32 id = 1;
+    string text = 2;
+    bool done = 3;
+}
+
+message TaskList {
+    repeated Task tasks = 1;
+}
+
+message AddReq {
+    string text = 1;
+    bool done = 2;
+}
+
+message Id {
+    int32 id = 1;
+}
+
+message Void {}
+
+service Tasks {
+    rpc List(Void) returns(TaskList) {}
+    rpc Add(AddReq) returns(Task) {}
+    rpc Complete(Id) returns(Task) {}
+}
