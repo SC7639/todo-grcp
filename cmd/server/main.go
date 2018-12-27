@@ -10,13 +10,30 @@ import (
 	"net"
 	"os"
 
+	"github.com/joho/godotenv"
+	"google.golang.org/grpc/credentials"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/sc7639/31-grpc/todo"
 	grpc "google.golang.org/grpc"
 )
 
 func main() {
-	srv := grpc.NewServer()
+	// Load environment details from dot env file (.env)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("could not load dot env file: %v", err)
+	}
+
+	cert := os.Getenv("CERT_FILE")
+	key := os.Getenv("KEY_FILE")
+
+	creds, err := credentials.NewServerTLSFromFile(cert, key)
+	if err != nil {
+		log.Fatalf("could not get server credentials: %v", err)
+	}
+
+	srv := grpc.NewServer(grpc.Creds(creds))
 	var tasks taskServer
 	todo.RegisterTasksServer(srv, tasks)
 	l, err := net.Listen("tcp", ":8888")

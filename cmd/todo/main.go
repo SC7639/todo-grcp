@@ -9,6 +9,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/joho/godotenv"
+
+	"google.golang.org/grpc/credentials"
+
 	"google.golang.org/grpc"
 
 	"github.com/sc7639/31-grpc/todo"
@@ -21,7 +25,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := grpc.Dial(":8888", grpc.WithInsecure())
+	// Load environment details from dot env file (.env)
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Fatalf("could not load dot env file: %v", err)
+	}
+
+	cert := os.Getenv("CERT_FILE")
+	srvName := os.Getenv("SERVER_NAME")
+
+	creds, err := credentials.NewClientTLSFromFile(cert, srvName)
+	if err != nil {
+		log.Fatalf("could not get client credentials: %v", err)
+	}
+
+	conn, err := grpc.Dial(":8888", grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("could not connet to backend: %v", err)
 	}
